@@ -1,0 +1,34 @@
+```{r}
+trainData <- read.csv("pml-training.csv", header=TRUE,na.strings=c("NA","","#DIV/0!"))
+testData <- read.csv("pml-testing.csv", header=TRUE, na.strings=c("NA","","#DIV/0!"))
+
+all.na <- sapply(testData, function(x) all(is.na(x)))
+
+trainData <- trainData[,which(!all.na)][-c(1:7)]
+testData <- testData[,which(!all.na)][-c(1:7)]
+
+trainData$classe <- as.factor(trainData$classe)
+```
+
+```{r, cache=TRUE}
+set.seed(2334)
+
+library(caret)
+inTrain <- createDataPartition(trainData$classe, p=0.70,list=FALSE)
+training <- trainData[inTrain,]
+testing <- trainData[-inTrain,]
+
+tc <- trainControl(method = "cv", number = 10)
+
+modFit <- train(
+  training$classe ~ ., 
+  data=training[,-dim(training)[2]], 
+  method="rf", 
+  trControl = tc,
+  prox=TRUE
+  )
+
+pred <- predict(modFit,testing[,-dim(testing)[2]])
+confusionMatrix(pred, testing$classe)
+```
+
