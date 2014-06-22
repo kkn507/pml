@@ -1,8 +1,18 @@
+# Human Activity Recognition data Analysis
+The data for this project come from this source: http://groupware.les.inf.puc-rio.br/har.
+
+### Load data
 
 ```r
 trainData <- read.csv("pml-training.csv", header=TRUE,na.strings=c("NA","","#DIV/0!"))
 testData <- read.csv("pml-testing.csv", header=TRUE, na.strings=c("NA","","#DIV/0!"))
+```
 
+### Clear data
+We get rid from first seven features cause first we don't need some of them and second: for example num_window answers the question so no application for machine learning. Also many feature are NA in test set? so we find and remove them from both sets
+
+
+```r
 all.na <- sapply(testData, function(x) all(is.na(x)))
 
 trainData <- trainData[,which(!all.na)][-c(1:7)]
@@ -10,6 +20,8 @@ testData <- testData[,which(!all.na)][-c(1:7)]
 
 trainData$classe <- as.factor(trainData$classe)
 ```
+## Buid model
+We create model using caret package, random forest algorithm and ten-fold cross validation. (time consuming process so cache the result). To estimate out-of-sample error we split training set in two parts (70/30).
 
 
 ```r
@@ -31,6 +43,21 @@ modFit <- train(
   )
 ```
 
+## Make some prediction and estimate out of sample error
+
+```r
+library(caret)
+```
+
+```
+## Loading required package: lattice
+## Loading required package: ggplot2
+```
+
+```r
+pred <- predict(modFit,testing[,-dim(testing)[2]])
+```
+
 ```
 ## Loading required package: randomForest
 ## randomForest 4.6-7
@@ -38,8 +65,9 @@ modFit <- train(
 ```
 
 ```r
-pred <- predict(modFit,testing[,-dim(testing)[2]])
-confusionMatrix(pred, testing$classe)
+cm <- confusionMatrix(pred, testing$classe)
+ce.out <- 1 - cm$overall["Accuracy"][[1]]
+print(cm)
 ```
 
 ```
@@ -75,4 +103,6 @@ confusionMatrix(pred, testing$classe)
 ## Detection Prevalence    0.285    0.194    0.175    0.162    0.184
 ## Balanced Accuracy       0.999    0.995    0.991    0.991    1.000
 ```
+### Out-of-sample Error 0.007
+
 

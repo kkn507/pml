@@ -5,7 +5,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <meta http-equiv="x-ua-compatible" content="IE=9" >
 
-<title></title>
+<title>Human Activity Recognition data Analysis</title>
 
 <style type="text/css">
 body, td {
@@ -179,16 +179,31 @@ hljs.initHighlightingOnLoad();
 </head>
 
 <body>
+<h1>Human Activity Recognition data Analysis</h1>
+
+<p>The data for this project come from this source: <a href="http://groupware.les.inf.puc-rio.br/har">http://groupware.les.inf.puc-rio.br/har</a>.</p>
+
+<h3>Load data</h3>
+
 <pre><code class="r">trainData &lt;- read.csv(&quot;pml-training.csv&quot;, header=TRUE,na.strings=c(&quot;NA&quot;,&quot;&quot;,&quot;#DIV/0!&quot;))
 testData &lt;- read.csv(&quot;pml-testing.csv&quot;, header=TRUE, na.strings=c(&quot;NA&quot;,&quot;&quot;,&quot;#DIV/0!&quot;))
+</code></pre>
 
-all.na &lt;- sapply(testData, function(x) all(is.na(x)))
+<h3>Clear data</h3>
+
+<p>We get rid from first seven features cause first we don&#39;t need some of them and second: for example num_window answers the question so no application for machine learning. Also many feature are NA in test set? so we find and remove them from both sets</p>
+
+<pre><code class="r">all.na &lt;- sapply(testData, function(x) all(is.na(x)))
 
 trainData &lt;- trainData[,which(!all.na)][-c(1:7)]
 testData &lt;- testData[,which(!all.na)][-c(1:7)]
 
 trainData$classe &lt;- as.factor(trainData$classe)
 </code></pre>
+
+<h2>Buid model</h2>
+
+<p>We create model using caret package, random forest algorithm and ten-fold cross validation. (time consuming process so cache the result). To estimate out-of-sample error we split training set in two parts (70/30).</p>
 
 <pre><code class="r">set.seed(2334)
 
@@ -208,13 +223,26 @@ modFit &lt;- train(
   )
 </code></pre>
 
+<h2>Make some prediction and estimate out of sample error</h2>
+
+<pre><code class="r">library(caret)
+</code></pre>
+
+<pre><code>## Loading required package: lattice
+## Loading required package: ggplot2
+</code></pre>
+
+<pre><code class="r">pred &lt;- predict(modFit,testing[,-dim(testing)[2]])
+</code></pre>
+
 <pre><code>## Loading required package: randomForest
 ## randomForest 4.6-7
 ## Type rfNews() to see new features/changes/bug fixes.
 </code></pre>
 
-<pre><code class="r">pred &lt;- predict(modFit,testing[,-dim(testing)[2]])
-confusionMatrix(pred, testing$classe)
+<pre><code class="r">cm &lt;- confusionMatrix(pred, testing$classe)
+ce.out &lt;- 1 - cm$overall[&quot;Accuracy&quot;][[1]]
+print(cm)
 </code></pre>
 
 <pre><code>## Confusion Matrix and Statistics
@@ -249,6 +277,8 @@ confusionMatrix(pred, testing$classe)
 ## Detection Prevalence    0.285    0.194    0.175    0.162    0.184
 ## Balanced Accuracy       0.999    0.995    0.991    0.991    1.000
 </code></pre>
+
+<h3>Out-of-sample Error 0.007</h3>
 
 </body>
 
