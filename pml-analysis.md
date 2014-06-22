@@ -20,7 +20,7 @@ testData <- testData[,which(!all.na)][-c(1:7)]
 
 trainData$classe <- as.factor(trainData$classe)
 ```
-## Buid model
+## Build model
 We create model using caret package, random forest algorithm and ten-fold cross validation. (time consuming process so cache the result). To estimate out-of-sample error we split training set in two parts (70/30).
 
 
@@ -47,24 +47,7 @@ modFit <- train(
 
 ```r
 library(caret)
-```
-
-```
-## Loading required package: lattice
-## Loading required package: ggplot2
-```
-
-```r
 pred <- predict(modFit,testing[,-dim(testing)[2]])
-```
-
-```
-## Loading required package: randomForest
-## randomForest 4.6-7
-## Type rfNews() to see new features/changes/bug fixes.
-```
-
-```r
 cm <- confusionMatrix(pred, testing$classe)
 ce.out <- 1 - cm$overall["Accuracy"][[1]]
 print(cm)
@@ -104,5 +87,17 @@ print(cm)
 ## Balanced Accuracy       0.999    0.995    0.991    0.991    1.000
 ```
 ### Out-of-sample Error 0.007
+
+## Make prediction for test set
+
+```r
+pred1 <- predict(modFit, testData[,-dim(testData)[2]])
+pred1
+```
+
+```
+##  [1] B A B A A E D B A A B C B A E E A B B B
+## Levels: A B C D E
+```
 
 

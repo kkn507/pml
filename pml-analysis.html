@@ -201,7 +201,7 @@ testData &lt;- testData[,which(!all.na)][-c(1:7)]
 trainData$classe &lt;- as.factor(trainData$classe)
 </code></pre>
 
-<h2>Buid model</h2>
+<h2>Build model</h2>
 
 <p>We create model using caret package, random forest algorithm and ten-fold cross validation. (time consuming process so cache the result). To estimate out-of-sample error we split training set in two parts (70/30).</p>
 
@@ -226,21 +226,8 @@ modFit &lt;- train(
 <h2>Make some prediction and estimate out of sample error</h2>
 
 <pre><code class="r">library(caret)
-</code></pre>
-
-<pre><code>## Loading required package: lattice
-## Loading required package: ggplot2
-</code></pre>
-
-<pre><code class="r">pred &lt;- predict(modFit,testing[,-dim(testing)[2]])
-</code></pre>
-
-<pre><code>## Loading required package: randomForest
-## randomForest 4.6-7
-## Type rfNews() to see new features/changes/bug fixes.
-</code></pre>
-
-<pre><code class="r">cm &lt;- confusionMatrix(pred, testing$classe)
+pred &lt;- predict(modFit,testing[,-dim(testing)[2]])
+cm &lt;- confusionMatrix(pred, testing$classe)
 ce.out &lt;- 1 - cm$overall[&quot;Accuracy&quot;][[1]]
 print(cm)
 </code></pre>
@@ -279,6 +266,16 @@ print(cm)
 </code></pre>
 
 <h3>Out-of-sample Error 0.007</h3>
+
+<h2>Make prediction for test set</h2>
+
+<pre><code class="r">pred1 &lt;- predict(modFit, testData[,-dim(testData)[2]])
+pred1
+</code></pre>
+
+<pre><code>##  [1] B A B A A E D B A A B C B A E E A B B B
+## Levels: A B C D E
+</code></pre>
 
 </body>
 
